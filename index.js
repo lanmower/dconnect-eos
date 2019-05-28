@@ -15,7 +15,7 @@ const url = require('./url');
 const actionHandler = new ObjectActionHandler([handlerVersion])
 
 var MongoClient = require('mongodb').MongoClient;
-
+ 
 
 MongoClient.connect(url, { useNewUrlParser: true,reconnectTries: 60, reconnectInterval: 1000}, async function(err, db) {
   global.db = db;
@@ -46,4 +46,21 @@ MongoClient.connect(url, { useNewUrlParser: true,reconnectTries: 60, reconnectIn
 
     actionWatcher.watch();
 });
+
+// Create a function to terminate your app gracefully:
+function gracefulShutdown(){
+    // First argument is [force], see mongoose doc.
+    if(db) db.close(false, () => {
+      console.log('MongoDb connection closed.');
+    });
+    if(rdb) rdb.close(false, () => {
+      console.log('MongoDb connection closed.');
+    });
+}
+
+process.stdin.resume();
+process.on('exit', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
+process.on('uncaughtException', gracefulShutdown);
 

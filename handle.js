@@ -26,7 +26,7 @@
  * In this example, we're watching the "eosio.token::transfer" action type and accumulating a running total using the
  * provided `state` object. Refer to the ObjectActionHandler implementation for `state`:
  * https://github.com/EOSIO/demux-js/blob/develop/examples/eos-transfers/ObjectActionHandler.js
-*/
+*/ 
 
 function parseTokenString(tokenString) {
   const [amountString, symbol] = tokenString.split(" ")
@@ -36,6 +36,7 @@ function parseTokenString(tokenString) {
 
 function updateTransferData(state, payload, blockInfo, context) {
   state.totalActions += 1
+console.log('transaction found');
   context.stateCopy = JSON.parse(JSON.stringify(state)) // Deep copy state to de-reference
   var dbo = db.db("dconnectlive");
   dbo.createCollection("transactions", function(err, res) {
@@ -52,28 +53,11 @@ function updateTransferData(state, payload, blockInfo, context) {
    context.stateCopy,
    { upsert: true });
 }
-function stateData(state, payload, blockInfo, context) {
-if(state.indexState.blockNumber % 100 == 1)  console.log(state.indexState.blockNumber);
-
-	context.stateCopy = JSON.parse(JSON.stringify(state)) // Deep copy state to de-reference
-  var dbo = db.db("dconnectlive");
-  if(blockInfo.blockNumber % 1000 == 1) {
-    dbo.collection("state").update(
-      {_id:"state"},
-      context.stateCopy,
-      { upsert: true }
-    );
-  }
-}
-
+ 
 const updaters = [
   {
     actionType: "dconnectlive::set",
     apply: updateTransferData,
-  },
-  {
-    actionType: "dconnectlive::rep",
-    apply: stateData,
   }
 ]
 

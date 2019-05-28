@@ -38,10 +38,21 @@ let state = {
     handlerVersionName: "v1",
   },
 }
+async function stateData(state, blockInfo) {
+if(state.indexState.blockNumber % 100 == 1)  console.log(state.indexState.blockNumber);
+  var dbo = db.db("dconnectlive");
+  if(blockInfo.blockNumber % 1000 == 1) {
+    await dbo.collection("state").update(
+      {_id:"state"},
+      state,
+      { upsert: true }
+    );
+  }
+} 
 
 const stateHistory = {}
 const stateHistoryMaxLength = 300
-
+ var dbo;
 class ObjectActionHandler extends AbstractActionHandler {
   async handleWithState(handle) {
     await handle(state)
@@ -56,7 +67,9 @@ class ObjectActionHandler extends AbstractActionHandler {
     return state.indexState
   }
 
+
   async updateIndexState(stateObj, block, isReplay, handlerVersionName) {
+    stateData(stateObj, block);
     stateObj.indexState.blockNumber = block.blockInfo.blockNumber
     stateObj.indexState.blockHash = block.blockInfo.blockHash
     stateObj.indexState.isReplay = isReplay

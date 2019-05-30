@@ -39,9 +39,12 @@ let state = {
   },
 }
 async function stateData(state, blockInfo) {
-if(state.indexState.blockNumber % 100 == 1)  console.log(state.indexState.blockNumber);
+  state.blockInfo = blockInfo.blockInfo;
   var dbo = db.db("dconnectlive");
-  if(blockInfo.blockNumber % 1000 == 1) {
+
+  if(state.indexState.blockNumber % 1000 == 1 && state.indexState.blockNumber != 0) {
+    console.log(state.indexState.blockNumber);
+    console.log('saving state'); 
     await dbo.collection("state").update(
       {_id:"state"},
       state,

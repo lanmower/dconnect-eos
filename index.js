@@ -53,12 +53,9 @@ function gracefulShutdown(){
     if(db) db.close(false, () => {
       console.log('MongoDb connection closed.');
     });
-    if(rdb) rdb.close(false, () => {
-      console.log('MongoDb connection closed.');
-    });
 }
 
-process.stdin.resume();
+process.stdin.resume();  
 process.on('exit', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);

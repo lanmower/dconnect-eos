@@ -34,17 +34,22 @@ function parseTokenString(tokenString) {
   return { amount, symbol }
 }
 
-function updateTransferData(state, payload, blockInfo, context) {
+async function updateTransferData(state, payload, blockInfo, context) {
   state.totalActions += 1
-console.log('transaction found');
   context.stateCopy = JSON.parse(JSON.stringify(state)) // Deep copy state to de-reference
-  var dbo = db.db("dconnectlive");
+  var dbo = await db.db("dconnectlive");
+  if(payload.account == 'eosio.token' && payload.name == 'transfer') {
+//	console.log(payload.data.from);
+	if(payload.data.from != 'g4ztamjqhage') {
+		return;
+	}
+  }
   dbo.createCollection("transactions", function(err, res) {
-    console.log("Collection created!");
   });
   dbo.createCollection("state", function(err, res) {
-    console.log("Collection created!");
   });
+  payload.timestamp = blockInfo.timestamp; 
+  payload.blockInfo = blockInfo;
   dbo.collection("transactions").insertOne(payload, function(err, res) {
       if (err) throw err;
       console.log("1 document inserted");
@@ -54,7 +59,13 @@ console.log('transaction found');
    { upsert: true });
 }
  
+async function updateTransfer(state, payload, blockInfo, context) {
+}
 const updaters = [
+ {
+    actionType: "eosio.token::transfer",
+    apply: updateTransferData,
+  },
   {
     actionType: "dconnectlive::set",
     apply: updateTransferData,

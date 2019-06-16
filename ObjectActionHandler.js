@@ -38,12 +38,13 @@ let state = {
     handlerVersionName: "v1",
   },
 }
+let lastUpdate = new Date().getTime();
 async function stateData(state, blockInfo) {
+  lastUpdate = new Date().getTime();
   state.blockInfo = blockInfo.blockInfo;
   var dbo = db.db("dconnectlive");
 
-  if(state.indexState.blockNumber % 1000 == 1 && state.indexState.blockNumber != 0) {
-    console.log(state.indexState.blockNumber);
+  if(state.indexState.blockNumber % 100 == 1 && state.indexState.blockNumber != 0) {
     console.log('saving state'); 
     await dbo.collection("state").update(
       {_id:"state"},
@@ -52,7 +53,11 @@ async function stateData(state, blockInfo) {
     );
   }
 } 
-
+console.log('starting');
+setInterval(()=>{
+	const ago = new Date().getTime()-lastUpdate
+	if(ago > 60000) process.exit();
+}, 10000);
 const stateHistory = {}
 const stateHistoryMaxLength = 300
  var dbo;
